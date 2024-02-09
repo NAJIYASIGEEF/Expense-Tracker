@@ -4,6 +4,9 @@ from budget.models import Transaction
 from django import forms
 from django.contrib.auth.models import User
 from django.contrib.auth import authenticate,login,logout
+from django.utils import timezone
+from django.db.models import Sum
+
 
 
     # fields="__all__"
@@ -28,7 +31,44 @@ class RegistrationForm(forms.ModelForm):
 class TransactionListView(View):
     def get(self,request,*args,**kwargs):
         qs=Transaction.objects.filter(user_object=request.user)
-        return render(request,"transaction_list.html",{"data":qs})
+        curr_month=timezone.now().month
+        curr_year=timezone.now().year
+        # print(curr_month,curr_year)
+        data=Transaction.objects.filter(
+            created_date__month=curr_month,
+            created_date__year=curr_year,
+            user_object=request.user
+        ).values("type").annotate(type_sum=Sum("amount"))
+        print(data)
+        
+
+        cat_qs=Transaction.objects.filter(
+            created_date__month=curr_month,
+            created_date__year=curr_year,
+            user_object=request.user
+        ).values("category").annotate(category_sum=Sum("amount"))
+        print(cat_qs)
+
+        return render(request,"transaction_list.html",{"data":qs,"type_total":data,"cat_total":cat_qs})
+    
+
+        # expense_total=Transaction.objects.filter(
+        #     user_object=request.user,
+        #     type="expense",
+        #     created_date__month=curr_month,
+        #     created_date__year=curr_year
+        # ).aggregate(Sum("amount"))
+        # print(expense_total)
+        
+
+        # income_total=Transaction.objects.filter(
+        #     user_object=request.user,
+        #     type="income",
+        #     created_date__month=curr_month,
+        #     created_date__year=curr_year
+        # ).aggregate(Sum("amount"))
+        # print(income_total)
+    
     
 
 # view for creating new transaction
