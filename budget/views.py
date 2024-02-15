@@ -8,6 +8,8 @@ from django.utils import timezone
 from django.db.models import Sum
 from django.utils.decorators import method_decorator
 from django.contrib import messages
+from django.views.decorators.cache import never_cache
+
 
 def signin_required(fn):
 
@@ -22,6 +24,9 @@ def signin_required(fn):
     # fields="__all__"
     # exclude=(" ",)
     # fields=["feild1","feild2"]
+
+decs=[signin_required,never_cache]
+
 
 class TransactionForm(forms.ModelForm):
     class Meta:
@@ -50,7 +55,8 @@ class RegistrationForm(forms.ModelForm):
 # url:localhost:8000/transactions/all
 # method: get
 
-@method_decorator(signin_required,name="dispatch")
+@method_decorator(decs,name="dispatch")
+
 class TransactionListView(View):
     def get(self,request,*args,**kwargs):
         qs=Transaction.objects.filter(user_object=request.user)
@@ -98,7 +104,7 @@ class TransactionListView(View):
 # url:localhost:8000/transactions/add/
 # methods:get,post
 
-@method_decorator(signin_required,name="dispatch")
+@method_decorator(decs,name="dispatch")
 class TransactionCreateView(View):
     def get(self,request,*args,**kwargs):
         form=TransactionForm()
@@ -120,7 +126,7 @@ class TransactionCreateView(View):
 # url : localhost:8000/transactions/{id}/
 # method: get
 
-@method_decorator(signin_required,name="dispatch")       
+@method_decorator(decs,name="dispatch")       
 class TransactionDetailView(View):
     def get(self,request,*args,**kwargs):
         id=kwargs.get("pk")
@@ -132,7 +138,7 @@ class TransactionDetailView(View):
 #url:localhost:8000/transactions/{id}/remove/
 #methods: get
     
-@method_decorator(signin_required,name="dispatch")
+@method_decorator(decs,name="dispatch")
 class TransactionDeleteView(View):
     def get(self,request,*args,**kwargs):
         id=kwargs.get("pk")
@@ -145,7 +151,7 @@ class TransactionDeleteView(View):
 # localhost:8000/{id}/change/
 # methods: get , post
     
-@method_decorator(signin_required,name="dispatch")
+@method_decorator(decs,name="dispatch")
 class TransactionUpdateView(View):
     def get(self,request,*args,**kwargs):
         id=kwargs.get("pk")
@@ -214,7 +220,7 @@ class SignInView(View):
 
         return render(request,"signin.html",{"form":form})
     
-@method_decorator(signin_required,name="dispatch")
+@method_decorator(decs,name="dispatch")
 class SignOutView(View):
     def get(self,request,*args,**kwargs):
         logout(request)
