@@ -199,7 +199,7 @@ class LoginForm(forms.Form):
 class SignInView(View):
     def get(self,request,*args,**kwargs):
         form=LoginForm()
-        return render(request,"login.html",{"form":form})
+        return render(request,"signin.html",{"form":form})
     def post(self,request,*args,**kwargs):
         form=LoginForm(request.POST)
         if form.is_valid():
@@ -212,7 +212,7 @@ class SignInView(View):
                 #request.user =>anonymous user (user has no session)
                 return redirect("transaction-list")
 
-        return render(request,"login.html",{"form":form})
+        return render(request,"signin.html",{"form":form})
     
 @method_decorator(signin_required,name="dispatch")
 class SignOutView(View):
